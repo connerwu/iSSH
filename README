@@ -1,3 +1,10 @@
- fork project from http://macserve.org.uk/projects/issh/
+Forked from https://github.com/goodloop/iSSH.
 
-just don't like the annoying connection broken alert. so remove it , auto reconnect.
+Change Logs:
+
+v3.2
+1. Automatically loading settings and connecting after app launched;
+2. Automatically reconnecting after disconnected because of the network errors or some others.
+
+v3.2
+Original version that forked from https://github.com/goodloop/iSSH.
