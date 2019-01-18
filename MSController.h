@@ -30,8 +30,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import <AGProcess/AGProcess.h>
-#import <EMKeychainProxy.h>
-#import <EMKeychainItem.h>
+#import "EMKeychainProxy.h"
+#import "EMKeychainItem.h"
 
 @interface MSController : NSObject {
 	

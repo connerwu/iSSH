@@ -38,15 +38,18 @@ NSString * const processName = @"ssh";
 
 
 - (void)awakeFromNib {
-	bNeedReConnect = false;
+	bNeedReConnect = true;
 	processId = -1;
 	[ self loadSettings:nil];
 
-	if([ self checkStatus ] == 0) {
-		
+	if ([ self checkStatus ] == 0) {
 		[ self setButtonsConnected ];
 		[ self startErrorCheck];
-	}
+        
+        [mainWindow performSelector:@selector(close) withObject:nil afterDelay:CGFLOAT_MIN];
+    } else {
+        [self performSelector:@selector(startCon:) withObject:nil afterDelay:CGFLOAT_MIN];
+    }
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
@@ -193,17 +196,29 @@ NSString * const processName = @"ssh";
 	
     [ task setArguments: arguments ];
 	processId = -1;// reset processId
-    [ task launch ];
+    
+    [ task launch];
+    [ progIndicator stopAnimation:progIndicator ];
+    [task release];
+    
+    if ([ self checkStatus ] != 0) {
+        [self delayReconnect];
+        
+        return;
+    }
+    
 	NSLog(@"Started Connection");
     
     [ self setButtonsConnected ];
 	
-	[ progIndicator stopAnimation:progIndicator ];
-	
 	[self startErrorCheck];
-
+    
+    [mainWindow close];
 }
 
+- (void)delayReconnect {
+    [self performSelector:@selector(startCon:) withObject:nil afterDelay:5.0f];
+}
 
 - (void)terminate {
 	bNeedReConnect = false;
@@ -278,14 +293,14 @@ NSString * const processName = @"ssh";
 		if(bNeedReConnect)
 		{
 			NSLog(@"reconnect now!!\n");
-			[self launch];
+			[self delayReconnect];
 		}
 		else {
 			NSAlert *alert = [[[NSAlert alloc] init] autorelease];
 			[ alert addButtonWithTitle: @"OK" ];
 			[ alert setMessageText: @"An error occurred" ];
 			[ alert setInformativeText: @"Check you have entered the settings correctly and that the remote computer is set up correctly" ];
-			[ alert setAlertStyle: NSWarningAlertStyle ];
+            [ alert setAlertStyle: NSAlertStyleWarning ];
 			[ alert runModal ];
 		}
 	}
@@ -310,36 +325,66 @@ NSString * const processName = @"ssh";
 - (int)checkFields {
 	
 	if([[ remoteAddress stringValue ] isEqualToString:@"" ]) {
-		NSRunAlertPanel(@"Settings Incomplete", [NSString stringWithFormat:@"You have not entered an Address"], @"Ok", nil, nil);
-		[ progIndicator stopAnimation:progIndicator ];
-		return 1;
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Settings Incomplete";
+        alert.informativeText = @"You have not entered an Address";
+        [alert addButtonWithTitle:@"OK"];
+        [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
+        
+        [ progIndicator stopAnimation:progIndicator ];
+        
+        return 1;
 	}
 	
 	if([[ userName stringValue ] isEqualToString:@"" ]) {
-		NSRunAlertPanel(@"Settings Incomplete", [NSString stringWithFormat:@"You have not entered a User Name"], @"Ok", nil, nil);
-		[ progIndicator stopAnimation:progIndicator ];
-		return 1;
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Settings Incomplete";
+        alert.informativeText = @"You have not entered a User Name";
+        [alert addButtonWithTitle:@"OK"];
+        [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
+        
+        [ progIndicator stopAnimation:progIndicator ];
+        
+        return 1;
 	}
 	
 	if([[ passWord stringValue ] isEqualToString:@"" ]) {
-		NSRunAlertPanel(@"Settings Incomplete", [NSString stringWithFormat:@"You have not entered a Password"], @"Ok", nil, nil);
-		[ progIndicator stopAnimation:progIndicator ];
-		return 1;
+        NSAlert *alert = [[NSAlert alloc] init];
+        alert.messageText = @"Settings Incomplete";
+        alert.informativeText = @"You have not entered a Password";
+        [alert addButtonWithTitle:@"OK"];
+        [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
+        
+        [ progIndicator stopAnimation:progIndicator ];
+        
+        return 1;
 	}
 	
 	if([ portForward state ] == 1) {
-		if([[ localPort stringValue ] isEqualToString:@"" ] || [[ remotePort stringValue ] isEqualToString:@"" ]) {
-			NSRunAlertPanel(@"Settings Incomplete", [NSString stringWithFormat:@"You have not entered a Port for forwarding"], @"Ok", nil, nil);
-			[ progIndicator stopAnimation:progIndicator ];
-			return 1;
-		}
+        if([[ localPort stringValue ] isEqualToString:@"" ] || [[ remotePort stringValue ] isEqualToString:@"" ]) {
+            NSAlert *alert = [[NSAlert alloc] init];
+            alert.messageText = @"Settings Incomplete";
+            alert.informativeText = @"You have not entered a Port for forwarding";
+            [alert addButtonWithTitle:@"OK"];
+            [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
+            
+            [ progIndicator stopAnimation:progIndicator ];
+            
+            return 1;
+        }
 	}
 	else {
-		if([[ socksPort stringValue ] isEqualToString:@"" ]) {
-			NSRunAlertPanel(@"Settings Incomplete", [NSString stringWithFormat:@"You have not entered a Port for the SOCKS Proxy"], @"Ok", nil, nil);
-			[ progIndicator stopAnimation:progIndicator ];
-			return 1;
-		}
+        if([[ socksPort stringValue ] isEqualToString:@"" ]) {
+            NSAlert *alert = [[NSAlert alloc] init];
+            alert.messageText = @"Settings Incomplete";
+            alert.informativeText = @"You have not entered a Port for the SOCKS Proxy";
+            [alert addButtonWithTitle:@"OK"];
+            [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
+            
+            [ progIndicator stopAnimation:progIndicator ];
+            
+            return 1;
+        }
 	}
 	
 	return 0;

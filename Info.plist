@@ -19,7 +19,7 @@
 	<key>CFBundleSignature</key>
 	<string>iSSH</string>
 	<key>CFBundleVersion</key>
-	<string>3.1</string>
+	<string>3.2</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -32,9 +32,9 @@
 	<true/>
 	<key>SUFeedURL</key>
 	<string>http://www.macserve.org.uk/downloads/issh/version.xml</string>
-	<key>SUShowReleaseNotes</key>
-	<true/>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
+	<key>SUShowReleaseNotes</key>
+	<true/>
 </dict>
 </plist>
